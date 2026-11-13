@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weekend Plans</title>
+<style>
+  :root {
+    --bg: #fbf3e7;
+    --card: #fffaf2;
+    --ink: #2a1f1a;
+    --muted: #75645a;
+    --line: #e6d7c3;
+    --accent: #d9482b;
+    --accent-ink: #fff8f2;
+    --accent-soft: #fbe2d8;
+    --ok: #2f7a4d;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(60rem 30rem at 85% -10%, #f6d9b8 0%, transparent 60%),
+      radial-gradient(40rem 26rem at -10% 110%, #f3c9bd 0%, transparent 60%),
+      var(--bg);
+    color: var(--ink);
+    font-family: "Avenir Next", Avenir, "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+  }
+
+  main {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; animation: rise 0.35s ease-out both; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .view.active { animation: none; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 36px 28px 28px;
+    box-shadow: 0 18px 40px -24px rgba(90, 50, 20, 0.45);
+  }
+
+  .eyebrow {
+    margin: 0 0 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    font-size: clamp(2rem, 8vw, 2.9rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  h1:focus { outline: none; }
+
+  .lede {
+    margin: 0 0 28px;
+    color: var(--muted);
+    font-size: 1.06rem;
+    text-wrap: pretty;
+  }
+
+  .verdict {
+    margin: 0 0 28px;
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+
+  button, textarea { font: inherit; color: inherit; }
+
+  button {
+    cursor: pointer;
+    border-radius: 14px;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    padding: 14px 20px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: transform 0.12s ease, background 0.15s ease, color 0.15s ease;
+  }
+  button:hover:not(:disabled) { background: var(--ink); color: var(--card); }
+  button:active:not(:disabled) { transform: scale(0.98); }
+  button:focus-visible,
+  textarea:focus-visible,
+  .pill input:focus-visible + span {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  button.primary:hover:not(:disabled) { background: #bf3a20; border-color: #bf3a20; color: var(--accent-ink); }
+
+  button:disabled {
+    cursor: not-allowed;
+    border-color: var(--line);
+    color: #b3a497;
+    text-decoration: line-through;
+  }
+
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .choices button {
+    padding: 26px 16px;
+    font-family: Georgia, "Iowan Old Style", serif;
+    font-size: 1.45rem;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .row > * { flex: 1 1 160px; }
+
+  .back {
+    display: inline-block;
+    margin-top: 22px;
+    border: 0;
+    padding: 6px 2px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .back:hover:not(:disabled) { background: transparent; color: var(--ink); }
+
+  label.q, legend.q {
+    display: block;
+    padding: 0;
+    margin: 0 0 10px;
+    font-weight: 700;
+    font-size: 1.08rem;
+  }
+
+  fieldset { border: 0; padding: 0; margin: 26px 0 0; }
+
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    border-radius: 14px;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    padding: 14px;
+    font-size: 1rem;
+  }
+  textarea::placeholder { color: #a8998c; }
+
+  .pills { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pill { position: relative; display: block; }
+  .pill input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .pill span {
+    display: block;
+    text-align: center;
+    padding: 14px 12px;
+    border-radius: 14px;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    font-weight: 600;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .pill input:hover + span { border-color: var(--ink); }
+  .pill input:checked + span {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: #8f2a14;
+  }
+
+  .plea {
+    margin: 24px 0 -14px;
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .plea:empty { display: none; }
+  .plea.nudge { animation: nudge 0.45s ease-out; }
+  @keyframes nudge {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-7px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .plea.nudge { animation: none; }
+  }
+
+  .error {
+    min-height: 1.4em;
+    margin: 14px 0 6px;
+    color: #a3260f;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  form button.primary { width: 100%; }
+
+  .summary {
+    margin: 0 0 24px;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .summary div { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .summary dt {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .summary dd { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+  .note { min-height: 1.4em; margin: 12px 0 0; color: var(--ok); font-size: 0.95rem; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- Phones and tablets: warning only -->
+  <section class="view card" id="blocked">
+    <p class="eyebrow">Laptop only</p>
+    <h1 tabindex="-1">Open this on a laptop.</h1>
+    <p class="lede" style="margin-bottom:0">This page doesn’t work on a phone. Open the same link on your laptop to continue.</p>
+  </section>
+
+  <!-- Mac greeting -->
+  <section class="view card" id="hi-astha">
+    <p class="eyebrow">Weekend plans</p>
+    <h1 tabindex="-1">Hi Astha</h1>
+    <p class="lede">There’s something you need to see.</p>
+    <button type="button" class="primary" data-go="astha">Click here</button>
+  </section>
+
+  <!-- Windows greeting -->
+  <section class="view card" id="hi-pari">
+    <p class="eyebrow">Weekend plans</p>
+    <h1 tabindex="-1">Hi Pari</h1>
+    <p class="lede">We have a couple of questions for you.</p>
+    <button type="button" class="primary" data-go="pari">Click here</button>
+  </section>
+
+  <!-- Fallback for other laptops (Linux, Chromebook) -->
+  <section class="view card" id="home">
+    <p class="eyebrow">Weekend plans</p>
+    <h1 tabindex="-1">Who is this person?</h1>
+    <p class="lede">Pick your name to continue.</p>
+    <div class="choices">
+      <button type="button" data-go="astha">Astha</button>
+      <button type="button" data-go="pari">Pari</button>
+    </div>
+  </section>
+
+  <!-- Astha -->
+  <section class="view card" id="astha">
+    <p class="eyebrow">About this weekend</p>
+    <h1 tabindex="-1">You are coming.</h1>
+    <p class="verdict">There is no option.</p>
+    <div class="row">
+      <button type="button" class="primary" data-go="astha-done">Okay, I’m coming</button>
+      <button type="button" disabled aria-label="Decline (not available)">Decline</button>
+    </div>
+    <button type="button" class="back" data-go="home">Not Astha? Go back</button>
+  </section>
+
+  <section class="view card" id="astha-done">
+    <p class="eyebrow">Settled</p>
+    <h1 tabindex="-1">Good choice, Astha.</h1>
+    <p class="lede">Not that there was another one. See you this weekend.</p>
+    <button type="button" class="back" data-go="home">Start over</button>
+  </section>
+
+  <!-- Pari -->
+  <section class="view card" id="pari">
+    <p class="eyebrow">About this weekend</p>
+    <h1 tabindex="-1">Two quick questions.</h1>
+    <form id="pari-form" novalidate>
+      <label class="q" for="coursework">What’s your update on your coursework?</label>
+      <textarea id="coursework" name="coursework" placeholder="Be honest…"></textarea>
+
+      <p class="plea" id="plea" role="status"></p>
+      <fieldset>
+        <legend class="q">Can we three go out this weekend?</legend>
+        <div class="pills">
+          <label class="pill"><input type="radio" name="weekend" value="Yes"><span>Yes</span></label>
+          <label class="pill"><input type="radio" name="weekend" value="No"><span>No</span></label>
+        </div>
+      </fieldset>
+
+      <p class="error" id="pari-error" role="alert"></p>
+      <button type="submit" class="primary">Send my answer</button>
+    </form>
+    <button type="button" class="back" data-go="home">Not Pari? Go back</button>
+  </section>
+
+  <section class="view card" id="pari-done">
+    <p class="eyebrow">Got it</p>
+    <h1 tabindex="-1" id="pari-headline"></h1>
+    <p class="lede" id="pari-sub"></p>
+    <dl class="summary">
+      <div><dt>Coursework update</dt><dd id="out-coursework"></dd></div>
+      <div><dt>Out this weekend?</dt><dd id="out-weekend"></dd></div>
+    </dl>
+    <button type="button" class="primary" id="share">Copy my reply</button>
+    <p class="note" id="share-note" role="status"></p>
+    <button type="button" class="back" data-go="pari">Change my answer</button>
+  </section>
+
+</main>
+
+<script>
+  const views = [...document.querySelectorAll('.view')];
+  const ids = views.map(v => v.id);
+  let pariReply = null;
+
+  // Laptop only. Mac opens Astha's greeting, Windows opens Pari's.
+  // Other laptops (Linux, Chromebook) get the "Who is this person?" page.
+  const START = { mac: 'hi-astha', windows: 'hi-pari' };
+
+  function detectDevice(ua = navigator.userAgent || '', touchPoints = navigator.maxTouchPoints || 0) {
+    // iPads, and iPhones in "desktop site" mode, claim to be a Mac but have a touch screen.
+    const touchMac = /Macintosh/.test(ua) && touchPoints > 1;
+    if (/Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(ua) || touchMac) return 'mobile';
+    if (/Windows/i.test(ua)) return 'windows';
+    if (/Macintosh|Mac OS X/i.test(ua)) return 'mac';
+    return 'other';
+  }
+
+  // Catches Android phones in "desktop site" mode, which hide their user agent.
+  const touchOnly = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  const device = touchOnly ? 'mobile' : detectDevice();
+
+  function show(id, focus = true) {
+    if (device === 'mobile') id = 'blocked';   // phones only ever see the warning
+    else if (id === 'blocked' || !ids.includes(id)) id = START[device] || 'home';
+    // The result page needs an answer first.
+    else if (id === 'pari-done' && !pariReply) id = 'pari';
+    views.forEach(v => v.classList.toggle('active', v.id === id));
+    if (focus) document.querySelector('#' + id + ' h1').focus();
+    window.scrollTo(0, 0);
+  }
+
+  function go(id) {
+    if (location.hash.slice(1) === id) show(id);
+    else location.hash = id;   // triggers hashchange, so Back works
+  }
+
+  window.addEventListener('hashchange', () => show(location.hash.slice(1) || 'home'));
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-go]');
+    if (btn) go(btn.dataset.go);
+  });
+
+  // Pari's form
+  const form = document.getElementById('pari-form');
+  const error = document.getElementById('pari-error');
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const coursework = form.coursework.value.trim();
+    const weekend = form.weekend.value;
+
+    if (!coursework) {
+      error.textContent = 'Tell us how the coursework is going first.';
+      form.coursework.focus();
+      return;
+    }
+    if (!weekend) {
+      error.textContent = 'Answer the weekend question first.';
+      form.querySelector('input[name="weekend"]').focus();
+      return;
+    }
+    error.textContent = '';
+    pariReply = { coursework, weekend };
+
+    // "No" never sticks (see below), so the answer here is always Yes.
+    document.getElementById('pari-headline').textContent = 'It’s a plan.';
+    document.getElementById('pari-sub').textContent =
+      'All three of us, this weekend. Send your reply over so it’s official.';
+    document.getElementById('out-coursework').textContent = coursework;
+    document.getElementById('out-weekend').textContent = weekend;
+    document.getElementById('share-note').textContent = '';
+    go('pari-done');
+  });
+
+  form.addEventListener('input', () => { error.textContent = ''; });
+
+  // Picking "No" doesn't stick: plead, clear it, and ask the same question again.
+  const plea = document.getElementById('plea');
+  form.addEventListener('change', e => {
+    if (e.target.name !== 'weekend') return;
+    if (e.target.value === 'No') {
+      e.target.checked = false;
+      plea.textContent = '👉🏻👈🏻 pls';
+      plea.classList.remove('nudge');
+      void plea.offsetWidth;   // restart the animation on every "No"
+      plea.classList.add('nudge');
+    } else {
+      plea.textContent = '';
+    }
+  });
+
+  // Copy / share the reply so it can be sent back
+  const shareBtn = document.getElementById('share');
+  const shareNote = document.getElementById('share-note');
+  if (navigator.share) shareBtn.textContent = 'Share my reply';
+
+  shareBtn.addEventListener('click', async () => {
+    if (!pariReply) return;
+    const text =
+      'Pari’s reply\n' +
+      'Coursework update: ' + pariReply.coursework + '\n' +
+      'Out this weekend? ' + pariReply.weekend;
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+        shareNote.textContent = 'Shared.';
+      } else {
+        await navigator.clipboard.writeText(text);
+        shareNote.textContent = 'Copied. Paste it in the group chat.';
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;   // share sheet dismissed
+      shareNote.textContent = 'Couldn’t copy automatically. Screenshot this page instead.';
+    }
+  });
+
+  // First load: with no page in the URL, start on the greeting for this OS.
+  const startHash = location.hash.slice(1);
+  const autoRoute = startHash || device === 'mobile' ? null : START[device];
+  // replaceState keeps Back from bouncing through an empty page.
+  if (autoRoute) history.replaceState(null, '', '#' + autoRoute);
+  show(autoRoute || startHash || 'home', false);
+</script>
+</body>
+</html>
